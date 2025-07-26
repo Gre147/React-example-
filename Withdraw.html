@@ -1,0 +1,838 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ByteMiner - Withdraw</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
+  <style>
+    /* Your existing CSS styles */
+    :root {
+      --primary: #00ffcc;
+      --secondary: #00ccff;
+      --dark-bg: #12131d;
+      --darker-bg: #0d0e16;
+      --card-bg: rgba(30, 31, 48, 0.7);
+      --accent: #6b5ce7;
+      --success: #00d46a;
+      --warning: #ffaa00;
+      --danger: #ff4d4d;
+    }
+    
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Courier New', monospace;
+    }
+    
+    body {
+      background: linear-gradient(135deg, var(--darker-bg), var(--dark-bg));
+      color: #fff;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+    
+    .logo-container {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      background: rgba(18, 19, 29, 0.95);
+      padding: 15px 20px;
+      z-index: 10;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      box-shadow: 0 4px 20px rgba(0, 204, 255, 0.3);
+      backdrop-filter: blur(10px);
+      border-bottom: 1px solid rgba(0, 204, 255, 0.2);
+    }
+    
+    .logo-left {
+      display: flex;
+      align-items: center;
+    }
+    
+    .logo-img {
+      width: 45px;
+      height: 45px;
+      border-radius: 8px;
+      margin-right: 15px;
+      background: linear-gradient(135deg, var(--accent), var(--secondary));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      color: white;
+    }
+    
+    .logo-left h1 {
+      color: var(--primary);
+      font-size: 24px;
+      margin: 0;
+      text-shadow: 0 0 10px rgba(0, 255, 204, 0.5);
+    }
+    
+    .info-icon {
+      color: var(--primary);
+      font-size: 24px;
+      cursor: pointer;
+      padding: 15px;
+      transition: color 0.3s;
+    }
+    
+    .info-icon:hover {
+      color: #ffffff;
+    }
+    
+    .wallet-display {
+      display: flex;
+      align-items: center;
+      background: rgba(30, 31, 48, 0.7);
+      padding: 8px 15px;
+      border-radius: 50px;
+      border: 1px solid rgba(0, 204, 255, 0.3);
+    }
+    
+    .coin-icon {
+      color: var(--warning);
+      margin-right: 8px;
+      font-size: 18px;
+    }
+    
+    #dashboard {
+      padding: 120px 20px 100px;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+    
+    .section-title {
+      color: var(--primary);
+      text-align: center;
+      margin-bottom: 30px;
+      text-shadow: 0 0 15px rgba(0, 255, 204, 0.4);
+      position: relative;
+      padding-bottom: 15px;
+    }
+    
+    .section-title::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 100px;
+      height: 3px;
+      background: linear-gradient(90deg, transparent, var(--primary), transparent);
+      border-radius: 3px;
+    }
+    
+    .stats-panel {
+      background: var(--card-bg);
+      border: 1px solid rgba(0, 204, 255, 0.3);
+      border-radius: 15px;
+      padding: 25px;
+      margin-bottom: 30px;
+      display: flex;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 20px;
+    }
+    
+    .stat-card {
+      flex: 1;
+      min-width: 200px;
+      background: rgba(0, 0, 0, 0.2);
+      border-radius: 12px;
+      padding: 20px;
+      text-align: center;
+      border-left: 4px solid var(--accent);
+    }
+    
+    .stat-value {
+      font-size: 28px;
+      font-weight: bold;
+      margin: 10px 0;
+      color: var(--primary);
+      text-shadow: 0 0 8px rgba(0, 255, 204, 0.3);
+    }
+    
+    .stat-label {
+      color: #b0b0d0;
+      font-size: 14px;
+    }
+    
+    .nav-bar {
+      position: fixed;
+      bottom: 0;
+      width: 100%;
+      background: rgba(18, 19, 29, 0.95);
+      display: flex;
+      justify-content: space-around;
+      padding: 15px 0;
+      backdrop-filter: blur(10px);
+      border-top: 1px solid rgba(0, 204, 255, 0.2);
+      z-index: 10;
+    }
+    
+    .nav-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      color: #b0b0d0;
+      text-decoration: none;
+      font-size: 14px;
+      transition: all 0.3s ease;
+    }
+    
+    .nav-item i {
+      font-size: 20px;
+      margin-bottom: 5px;
+    }
+    
+    .nav-item:hover,
+    .nav-item.active {
+      color: var(--primary);
+    }
+    
+    .nav-item.active i {
+      color: var(--primary);
+      text-shadow: 0 0 10px rgba(0, 255, 204, 0.5);
+    }
+    
+    .user-panel {
+      position: fixed;
+      top: 0;
+      right: -345px;
+      width: 300px;
+      height: 100%;
+      background-color: #111828;
+      color: #fff;
+      padding: 20px;
+      box-shadow: -3px 0 10px rgba(0, 255, 255, 0.3);
+      transition: right 0.4s ease;
+      z-index: 999;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+    
+    .user-panel.active {
+      right: 0;
+    }
+    
+    .user-panel h2 {
+      color: #00ccff;
+      margin-top: 0;
+    }
+    
+    .user-panel p {
+      font-size: 16px;
+      margin: 8px 0;
+    }
+    
+    .user-panel .close-btn {
+      position: absolute;
+      top: 10px;
+      right: 15px;
+      font-size: 20px;
+      cursor: pointer;
+      color: #ff4d4d;
+    }
+    
+    .logout-btn {
+      background-color: #ff4d4d;
+      border: none;
+      padding: 10px 15px;
+      color: white;
+      border-radius: 8px;
+      margin-top: 20px;
+      cursor: pointer;
+      transition: background-color 0.3s;
+    }
+    
+    .logout-btn:hover {
+      background-color: #e60000;
+    }
+    
+    .panel-content {
+      flex-grow: 1;
+      overflow-y: auto;
+    }
+    
+    .user-panel .footer {
+      font-size: 12px;
+      color: #888;
+      text-align: center;
+      padding: 10px 0;
+    }
+    
+    .notification {
+      position: fixed;
+      top: 80px;
+      right: 20px;
+      padding: 15px 25px;
+      background: rgba(0, 200, 100, 0.9);
+      color: white;
+      border-radius: 8px;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+      z-index: 1000;
+      transform: translateX(200%);
+      transition: transform 0.4s ease;
+    }
+    
+    .notification.show {
+      transform: translateX(0);
+    }
+    
+    .notification.info {
+      background: rgba(0, 100, 200, 0.9);
+    }
+    
+    .notification.warning {
+      background: rgba(255, 170, 0, 0.9);
+    }
+    
+    /* Withdrawal Section */
+    .withdrawal-container {
+      background: var(--card-bg);
+      border: 1px solid rgba(0, 204, 255, 0.3);
+      border-radius: 15px;
+      padding: 25px;
+      position: relative;
+      overflow: hidden;
+      max-width: 600px;
+      margin: 0 auto;
+    }
+    
+    .withdrawal-container::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 4px;
+      background: linear-gradient(90deg, var(--accent), var(--secondary));
+    }
+    
+    .form-group {
+      margin-bottom: 20px;
+    }
+    
+    .form-label {
+      display: block;
+      margin-bottom: 8px;
+      color: var(--primary);
+    }
+    
+    .form-input {
+      width: 100%;
+      padding: 12px 15px;
+      background: rgba(0, 0, 0, 0.2);
+      border: 1px solid rgba(0, 204, 255, 0.3);
+      border-radius: 8px;
+      color: white;
+      font-family: 'Courier New', monospace;
+      font-size: 16px;
+    }
+    
+    .form-input:focus {
+      outline: none;
+      border-color: var(--secondary);
+      box-shadow: 0 0 10px rgba(0, 204, 255, 0.5);
+    }
+    
+    .ton-info {
+      background: rgba(0, 0, 0, 0.2);
+      border-radius: 10px;
+      padding: 15px;
+      margin: 20px 0;
+      border-left: 3px solid var(--warning);
+    }
+    
+    .ton-info h4 {
+      color: var(--warning);
+      margin-bottom: 10px;
+    }
+    
+    .ton-info p {
+      font-size: 14px;
+      color: #b0b0d0;
+      line-height: 1.5;
+    }
+    
+    .withdraw-btn {
+      width: 100%;
+      padding: 15px;
+      background: linear-gradient(135deg, var(--accent), var(--secondary));
+      color: #000;
+      font-weight: bold;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-family: 'Courier New', monospace;
+      font-size: 18px;
+      transition: all 0.3s ease;
+      margin-top: 15px;
+    }
+    
+    .withdraw-btn:hover {
+      transform: scale(1.03);
+      box-shadow: 0 0 15px rgba(107, 92, 231, 0.5);
+    }
+    
+    .withdraw-btn:disabled {
+      background: #666;
+      cursor: not-allowed;
+      color: #aaa;
+    }
+    
+    .mining-indicator {
+      position: fixed;
+      bottom: 70px;
+      right: 20px;
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
+      background: rgba(0, 0, 0, 0.3);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: 2px solid var(--secondary);
+      box-shadow: 0 0 15px rgba(0, 204, 255, 0.3);
+      z-index: 5;
+      animation: pulse 2s infinite;
+    }
+    
+    .mining-indicator i {
+      color: var(--primary);
+      font-size: 24px;
+      animation: spin 4s linear infinite;
+    }
+    
+    /* Responsive design */
+    @media (max-width: 768px) {
+      .stats-panel {
+        flex-direction: column;
+      }
+      
+      .logo-left h1 {
+        font-size: 20px;
+      }
+      
+      .info-icon {
+        padding: 10px;
+      }
+      
+      .wallet-display {
+        position: absolute;
+        top: 80px;
+        right: 20px;
+        font-size: 14px;
+      }
+      
+      .withdrawal-container {
+        padding: 20px 15px;
+      }
+    }
+    
+    /* Animations */
+    @keyframes pulse {
+      0% {
+        box-shadow: 0 0 0 0 rgba(0, 204, 255, 0.5);
+      }
+      
+      70% {
+        box-shadow: 0 0 0 15px rgba(0, 204, 255, 0);
+      }
+      
+      100% {
+        box-shadow: 0 0 0 0 rgba(0, 204, 255, 0);
+      }
+    }
+    
+    @keyframes spin {
+      0% {
+        transform: rotate(0deg);
+      }
+      
+      100% {
+        transform: rotate(360deg);
+      }
+    }
+    
+    /* Preloader */
+    #preloader {
+      height: 100vh;
+      width: 100%;
+      position: fixed;
+      z-index: 100;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background: rgba(13, 14, 22, 0.9);
+    }
+    
+    .spinner {
+      width: 60px;
+      height: 60px;
+      border: 5px solid rgba(0, 204, 255, 0.2);
+      border-top: 5px solid var(--secondary);
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+    
+    /* Root container */
+    #root {
+      position: relative;
+    }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+  
+  <script type="text/babel">
+    const { useState, useEffect, useRef } = React;
+
+    function Withdraw() {
+      // State declarations
+      const [preloaderVisible, setPreloaderVisible] = useState(true);
+      const [userPanelActive, setUserPanelActive] = useState(false);
+      const [notification, setNotification] = useState({ show: false, message: '', type: 'info' });
+      const [userData, setUserData] = useState(null);
+      const [coinBalance, setCoinBalance] = useState(0);
+      const [walletAddress, setWalletAddress] = useState('');
+      const [withdrawAmount, setWithdrawAmount] = useState('');
+      const [balanceDisplay, setBalanceDisplay] = useState('0.0000');
+
+      // Firebase configuration
+      const firebaseConfig = {
+  apiKey: process.env.REACT_APP_FIREBASE_API_KEY,
+  authDomain: process.env.REACT_APP_FIREBASE_AUTH_DOMAIN,
+  projectId: process.env.REACT_APP_FIREBASE_PROJECT_ID,
+  storageBucket: process.env.REACT_APP_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: process.env.REACT_APP_FIREBASE_MESSAGING_SENDER_ID,
+  appId: process.env.REACT_APP_FIREBASE_APP_ID,
+  measurementId: process.env.REACT_APP_FIREBASE_MEASUREMENT_ID,
+  databaseURL: process.env.REACT_APP_FIREBASE_DATABASE_URL
+};
+
+      // Firebase references
+      const db = useRef(null);
+      const auth = useRef(null);
+
+      // Initialize Firebase
+      useEffect(() => {
+        if (!firebase.apps.length) {
+          firebase.initializeApp(firebaseConfig);
+        }
+        db.current = firebase.database();
+        auth.current = firebase.auth();
+        
+        // Hide preloader after 3 seconds
+        const timer = setTimeout(() => {
+          setPreloaderVisible(false);
+        }, 3000);
+        
+        return () => clearTimeout(timer);
+      }, []);
+
+      // Show notification
+      const showNotification = (message, type = 'info') => {
+        setNotification({ show: true, message, type });
+        setTimeout(() => {
+          setNotification(prev => ({ ...prev, show: false }));
+        }, 3000);
+      };
+
+      // Toggle user panel
+      const togglePanel = () => {
+        setUserPanelActive(!userPanelActive);
+      };
+
+      // Logout function
+      const logout = () => {
+        auth.current.signOut().then(() => {
+          alert("Logged out!");
+          localStorage.removeItem("loggedInUser");
+          window.location.href = "Login.html";
+        }).catch((error) => {
+          console.error("Logout error:", error);
+        });
+      };
+
+      // Fetch user data
+      const fetchUserData = (username) => {
+        if (!username) return;
+        
+        const userRef = db.current.ref("byteUsers/" + username);
+        
+        userRef.child("coin").on("value", snapshot => {
+          const balance = parseFloat(snapshot.val() || 0);
+          setCoinBalance(balance);
+        });
+        
+        userRef.child("tonWallet").once("value").then(snapshot => {
+          if (snapshot.exists()) {
+            setWalletAddress(snapshot.val());
+          }
+        });
+      };
+
+      // Save wallet address
+      const saveWalletAddress = () => {
+        if (!userData) {
+          showNotification("Please log in to save wallet", "warning");
+          return;
+        }
+        
+        const wallet = walletAddress.trim();
+        if (!wallet) {
+          showNotification("Please enter a valid TON wallet address", "warning");
+          return;
+        }
+        
+        const userRef = db.current.ref("byteUsers/" + userData.username);
+        
+        userRef.update({ tonWallet: wallet })
+          .then(() => {
+            showNotification("Wallet address saved successfully!");
+          })
+          .catch(error => {
+            console.error("Error saving wallet:", error);
+            showNotification("Failed to save wallet address", "warning");
+          });
+      };
+
+      // Handle withdrawal
+      const handleWithdraw = () => {
+        showNotification("Withdrawal not available at the moment. Please try again later.", "warning");
+      };
+
+      // Handle amount change
+      const handleAmountChange = (e) => {
+        const amount = e.target.value;
+        setWithdrawAmount(amount);
+        
+        if (amount) {
+          const fee = 0.5;
+          const total = parseFloat(amount) + fee;
+          setBalanceDisplay(isNaN(total) ? '0.0000' : total.toFixed(4));
+        } else {
+          setBalanceDisplay(coinBalance.toFixed(4));
+        }
+      };
+
+      // Initialize user data
+      useEffect(() => {
+        const localStorageUser = JSON.parse(localStorage.getItem("loggedInUser"));
+        if (localStorageUser) {
+          setUserData(localStorageUser);
+          fetchUserData(localStorageUser.username);
+          return;
+        }
+
+        const unsubscribe = auth.current.onAuthStateChanged(firebaseUser => {
+          if (firebaseUser) {
+            db.current.ref("byteUsers")
+              .orderByChild("email")
+              .equalTo(firebaseUser.email)
+              .once("value")
+              .then(snapshot => {
+                if (snapshot.exists()) {
+                  const userKey = Object.keys(snapshot.val())[0];
+                  const userData = snapshot.val()[userKey];
+                  localStorage.setItem("loggedInUser", JSON.stringify(userData));
+                  setUserData(userData);
+                  fetchUserData(userData.username);
+                } else {
+                  console.error("User data not found in database");
+                  logout();
+                }
+              });
+          } else {
+            setTimeout(() => {
+              alert("You're not logged in. Redirecting to login page...");
+              window.location.href = "Login.html";
+            }, 500);
+          }
+        });
+
+        return () => unsubscribe();
+      }, []);
+
+      // Update balance display when coin balance changes
+      useEffect(() => {
+        setBalanceDisplay(coinBalance.toFixed(4));
+      }, [coinBalance]);
+
+      // Open white paper
+      const openWhitePaper = () => {
+        window.location.href = "WhitePaper.html";
+      };
+
+      return (
+        <div>
+          {/* Preloader */}
+          {preloaderVisible && (
+            <div id="preloader">
+              <div className="spinner"></div>
+            </div>
+          )}
+
+          {/* Notification */}
+          <div className={`notification ${notification.type} ${notification.show ? 'show' : ''}`}>
+            {notification.message}
+          </div>
+
+          {/* Header */}
+          <div className="logo-container">
+            <div className="logo-left">
+              <div className="logo-img">
+                <i className="fas fa-microchip"></i>
+              </div>
+              <h1>ByteMiner</h1>
+            </div>
+            <div className="wallet-display">
+              <i className="fas fa-coins coin-icon"></i>
+              <div id="coin">Coins: <span id="coin-value" className="balance-display">{coinBalance.toFixed(4)}</span></div>
+            </div>
+            <div className="info-icon" onClick={togglePanel}>
+              <i className="fas fa-info-circle"></i>
+            </div>
+          </div>
+
+          {/* Mining Indicator */}
+          <div className="mining-indicator">
+            <i className="fas fa-microchip"></i>
+          </div>
+
+          {/* Main Content */}
+          <div id="dashboard">
+            <h1 className="section-title">WITHDRAW FUNDS</h1>
+            <h3>Welcome, <span id="user-name">{userData?.name || 'User'}</span></h3>
+            
+            {/* Stats Panel */}
+            <div className="stats-panel">
+              <div className="stat-card">
+                <div className="stat-label">AVAILABLE BALANCE</div>
+                <div className="stat-value" id="balance-value">{balanceDisplay}</div>
+              </div>
+              
+              <div className="stat-card">
+                <div className="stat-label">MINIMUM WITHDRAWAL</div>
+                <div className="stat-value">5.0000</div>
+              </div>
+              
+              <div className="stat-card">
+                <div className="stat-label">WITHDRAWAL FEE</div>
+                <div className="stat-value">0.5000</div>
+              </div>
+            </div>
+            
+            {/* Withdrawal Form */}
+            <div className="withdrawal-container">
+              <h3>Withdraw Your Tokens</h3>
+              <p>Withdraw your ByteTokens to your TON wallet address</p>
+              
+              <div className="ton-info">
+                <h4><i className="fab fa-telegram"></i> TON Blockchain</h4>
+                <p>Withdrawals are processed on the TON blockchain. Ensure you enter a valid TON wallet address. Transactions may take 5-10 minutes to complete.</p>
+              </div>
+              
+              <div className="form-group">
+                <label className="form-label">TON Wallet Address</label>
+                <input 
+                  type="text" 
+                  id="wallet-address" 
+                  className="form-input" 
+                  placeholder="Enter your TON wallet address"
+                  value={walletAddress}
+                  onChange={(e) => setWalletAddress(e.target.value)}
+                />
+              </div>
+              
+              <div className="form-group">
+                <label className="form-label">Amount to Withdraw (BT)</label>
+                <input 
+                  type="number" 
+                  id="withdraw-amount" 
+                  className="form-input" 
+                  placeholder="Enter amount" 
+                  min="5" 
+                  step="0.0001"
+                  value={withdrawAmount}
+                  onChange={handleAmountChange}
+                />
+              </div>
+              
+              <button id="save-wallet-btn" className="withdraw-btn" onClick={saveWalletAddress}>
+                <i className="fas fa-save"></i> Save Wallet Address
+              </button>
+              
+              <button id="withdraw-btn" className="withdraw-btn" onClick={handleWithdraw}>
+                <i className="fas fa-wallet"></i> Withdraw Tokens
+              </button>
+            </div>
+          </div>
+          
+          {/* Navigation */}
+          <div className="nav-bar">
+            <a href="Task.html" className="nav-item">
+              <i className="fas fa-tasks"></i>
+              <span>Tasks</span>
+            </a>
+            <a href="Dashboard.html" className="nav-item">
+              <i className="fas fa-database"></i>
+              <span>Mine</span>
+            </a>
+            <a href="Withdraw.html" className="nav-item active">
+              <i className="fas fa-wallet"></i>
+              <span>Withdraw</span>
+            </a>
+          </div>
+          
+          {/* User Panel */}
+          <div className={`user-panel ${userPanelActive ? 'active' : ''}`} id="userPanel">
+            <div className="panel-content">
+              <span className="close-btn" onClick={togglePanel}>&times;</span>
+              <h2>User Info</h2>
+              <p><strong>Full Name:</strong> <span id="info-name">{userData?.name || ''}</span></p>
+              <p><strong>Phone:</strong> <span id="info-tel">{userData?.tel || ''}</span></p>
+              <p><strong>Email:</strong> <span id="info-email">{userData?.email || ''}</span></p>
+              <p><strong>Username:</strong> <span id="info-username">{userData?.username || ''}</span></p>
+              <p><strong>Date of Birth:</strong> <span id="info-dob">{userData?.dob || ''}</span></p>
+              <p><strong>TON Wallet:</strong> <span id="info-wallet" style={{wordBreak: 'break-all', color: 'var(--primary)'}}>
+                {walletAddress || 'Not set'}
+              </span></p>
+              
+              <button className="logout-btn" onClick={logout}>
+                <i className="fas fa-sign-out-alt"></i> Log Out
+              </button>
+              
+              <div className="extra-links" style={{marginTop: '20px'}}>
+                <button onClick={openWhitePaper} className="logout-btn" style={{background: 'var(--accent)'}}>
+                  White Paper
+                </button>
+              </div>
+            </div>
+            
+            <div className="footer">© ByteMiner 2025. All rights reserved.</div>
+          </div>
+        </div>
+      );
+    }
+
+    // Render the component
+    const root = ReactDOM.createRoot(document.getElementById('root'));
+    root.render(<Withdraw />);
+  </script>
+</body>
+</html>

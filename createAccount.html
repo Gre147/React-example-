@@ -1,0 +1,1095 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ByteMiner React - Create Account</title>
+  <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Courier New', monospace;
+    }
+    
+    :root {
+      --primary: #00ffcc;
+      --secondary: #00ccff;
+      --dark-bg: #12131d;
+      --darker-bg: #0d0e16;
+      --card-bg: rgba(30, 31, 48, 0.7);
+      --accent: #6b5ce7;
+      --success: #00d46a;
+      --warning: #ffaa00;
+      --danger: #ff4d4d;
+    }
+    
+    body,
+    html {
+      height: 100%;
+      background: linear-gradient(135deg, var(--darker-bg), var(--dark-bg));
+      position: relative;
+      overflow: auto;
+      color: #fff;
+    }
+    
+    #root {
+      height: 100%;
+    }
+    
+    /* Circuit background pattern */
+    .circuit-bg {
+      position: fixed;
+      width: 100%;
+      height: 100%;
+      background-image:
+        radial-gradient(circle at 10% 20%, rgba(0, 204, 255, 0.05) 0%, transparent 20%),
+        radial-gradient(circle at 90% 80%, rgba(0, 204, 255, 0.05) 0%, transparent 20%),
+        linear-gradient(45deg, transparent 49%, rgba(0, 204, 255, 0.05) 50%, transparent 51%),
+        linear-gradient(-45deg, transparent 49%, rgba(0, 204, 255, 0.05) 50%, transparent 51%);
+      background-size: 200px 200px;
+      z-index: 0;
+      opacity: 0.5;
+    }
+    
+    .mining-grid {
+      position: fixed;
+      width: 100%;
+      height: 100%;
+      background:
+        linear-gradient(90deg, rgba(18, 19, 29, 0.8) 1px, transparent 1px),
+        linear-gradient(rgba(18, 19, 29, 0.8) 1px, transparent 1px);
+      background-size: 20px 20px;
+      z-index: 1;
+    }
+    
+    .center-content {
+      position: relative;
+      z-index: 2;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 30px 20px;
+      min-height: 100%;
+      width: 100%;
+      max-width: 500px;
+      margin: 0 auto;
+    }
+    
+    .logo-container {
+      text-align: center;
+      margin-bottom: 20px;
+      position: relative;
+      padding-bottom: 15px;
+    }
+    
+    .logo-container::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 80px;
+      height: 2px;
+      background: linear-gradient(90deg, transparent, var(--primary), transparent);
+      border-radius: 3px;
+    }
+    
+    .logo-img {
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--accent), var(--secondary));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 10px;
+      font-size: 32px;
+      color: white;
+      box-shadow: 0 0 20px rgba(0, 204, 255, 0.5);
+    }
+    
+    .logo-container h1 {
+      color: var(--primary);
+      font-size: 28px;
+      margin: 5px 0 0;
+      text-shadow: 0 0 15px rgba(0, 255, 204, 0.5);
+    }
+    
+    .create-container {
+      background: var(--card-bg);
+      border: 1px solid rgba(0, 204, 255, 0.3);
+      border-radius: 15px;
+      padding: 25px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+      width: 100%;
+      position: relative;
+      overflow: hidden;
+      margin-bottom: 20px;
+    }
+    
+    .create-container::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 3px;
+      background: linear-gradient(90deg, var(--accent), var(--secondary));
+    }
+    
+    /* Form grid layout */
+    .form-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 15px;
+    }
+    
+    .input-group {
+      position: relative;
+    }
+    
+    .input-group label {
+      display: block;
+      margin-bottom: 6px;
+      color: var(--primary);
+      font-weight: bold;
+      font-size: 14px;
+    }
+    
+    .input-field {
+      width: 100%;
+      padding: 12px 15px 12px 40px;
+      border-radius: 8px;
+      border: 1px solid rgba(0, 204, 255, 0.3);
+      background: rgba(0, 0, 0, 0.3);
+      color: white;
+      font-family: 'Courier New', monospace;
+      font-size: 14px;
+      transition: all 0.3s ease;
+    }
+    
+    .input-field:focus {
+      outline: none;
+      border-color: var(--secondary);
+      box-shadow: 0 0 10px rgba(0, 204, 255, 0.5);
+    }
+    
+    .input-icon {
+      position: absolute;
+      left: 12px;
+      top: 36px;
+      color: var(--secondary);
+      font-size: 16px;
+    }
+    
+    .create-btn {
+      width: 100%;
+      padding: 12px;
+      margin-top: 10px;
+      background: linear-gradient(135deg, var(--accent), var(--secondary));
+      border: none;
+      color: #000;
+      border-radius: 8px;
+      cursor: pointer;
+      font-family: 'Courier New', monospace;
+      font-weight: bold;
+      font-size: 15px;
+      transition: all 0.3s ease;
+      position: relative;
+      overflow: hidden;
+      z-index: 1;
+    }
+    
+    .create-btn:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 5px 15px rgba(107, 92, 231, 0.5);
+    }
+    
+    .create-btn:active {
+      transform: translateY(0);
+    }
+    
+    .create-btn::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+      transition: 0.5s;
+      z-index: -1;
+    }
+    
+    .create-btn:hover::before {
+      left: 100%;
+    }
+    
+    .message {
+      margin-top: 12px;
+      padding: 10px;
+      border-radius: 6px;
+      text-align: center;
+      font-weight: bold;
+      font-size: 14px;
+    }
+    
+    .success-message {
+      background: rgba(0, 212, 106, 0.2);
+      border: 1px solid var(--success);
+      color: var(--success);
+    }
+    
+    .error-message {
+      background: rgba(255, 77, 77, 0.2);
+      border: 1px solid var(--danger);
+      color: var(--danger);
+    }
+    
+    .footer {
+      margin-top: 15px;
+      font-size: 11px;
+      color: #888;
+      text-align: center;
+      max-width: 450px;
+    }
+    
+    .login-link {
+      text-align: center;
+      margin-top: 15px;
+      font-size: 13px;
+      color: #aaa;
+    }
+    
+    .login-link a {
+      color: var(--secondary);
+      text-decoration: none;
+      font-weight: bold;
+      transition: all 0.3s ease;
+    }
+    
+    .login-link a:hover {
+      color: var(--primary);
+      text-shadow: 0 0 8px rgba(0, 255, 204, 0.5);
+    }
+    
+    /* Mining animation in corner */
+    .mining-indicator {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      background: rgba(0, 0, 0, 0.3);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: 2px solid var(--secondary);
+      box-shadow: 0 0 10px rgba(0, 204, 255, 0.3);
+      z-index: 5;
+      animation: pulse 2s infinite;
+    }
+    
+    .mining-indicator i {
+      color: var(--primary);
+      font-size: 20px;
+      animation: spin 4s linear infinite;
+    }
+    
+    @keyframes spin {
+      0% {
+        transform: rotate(0deg);
+      }
+      
+      100% {
+        transform: rotate(360deg);
+      }
+    }
+    
+    @keyframes pulse {
+      0% {
+        box-shadow: 0 0 0 0 rgba(0, 204, 255, 0.5);
+      }
+      
+      70% {
+        box-shadow: 0 0 0 10px rgba(0, 204, 255, 0);
+      }
+      
+      100% {
+        box-shadow: 0 0 0 0 rgba(0, 204, 255, 0);
+      }
+    }
+    
+    /* Password strength indicator */
+    .password-strength {
+      margin-top: 6px;
+      height: 5px;
+      border-radius: 3px;
+      background: rgba(255, 255, 255, 0.1);
+      overflow: hidden;
+      position: relative;
+    }
+    
+    .strength-meter {
+      height: 100%;
+      width: 0;
+      border-radius: 3px;
+      transition: width 0.3s ease;
+    }
+    
+    .password-rules {
+      font-size: 11px;
+      color: #aaa;
+      margin-top: 4px;
+    }
+    
+    .password-rules ul {
+      padding-left: 18px;
+      margin-top: 4px;
+    }
+    
+    .password-rules li {
+      margin-bottom: 2px;
+    }
+    
+    .password-rules .valid {
+      color: var(--success);
+    }
+    
+    .password-rules .invalid {
+      color: var(--danger);
+    }
+    
+    /* Referral section styles */
+    .referral-section {
+      margin-top: 15px;
+      padding-top: 15px;
+      border-top: 1px dashed rgba(0, 204, 255, 0.3);
+    }
+    
+    .referral-header {
+      display: flex;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+    
+    .referral-icon {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: rgba(107, 92, 231, 0.2);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-right: 10px;
+      font-size: 16px;
+      color: var(--secondary);
+    }
+    
+    .referral-info {
+      flex: 1;
+    }
+    
+    .referral-title {
+      color: var(--primary);
+      font-weight: bold;
+      font-size: 16px;
+    }
+    
+    .referral-subtitle {
+      color: #aaa;
+      font-size: 12px;
+    }
+    
+    /* Referral success animation */
+    .coin-animation {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 100;
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+    
+    .coin-animation.active {
+      opacity: 1;
+    }
+    
+    .coin {
+      width: 60px;
+      height: 60px;
+      background: linear-gradient(135deg, #ffd700, #ffb700);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+      color: #8e6c00;
+      box-shadow: 0 0 30px rgba(255, 215, 0, 0.8);
+      position: relative;
+      animation: coinFly 1.5s ease-out forwards;
+    }
+    
+    @keyframes coinFly {
+      0% {
+        transform: translateY(0) scale(1);
+        opacity: 1;
+      }
+      
+      30% {
+        transform: translateY(-100px) scale(1.2);
+      }
+      
+      70% {
+        transform: translateY(-200px) scale(1);
+        opacity: 0.8;
+      }
+      
+      100% {
+        transform: translateY(-250px) scale(0.8);
+        opacity: 0;
+      }
+    }
+    
+    /* Preloader */
+    .preloader {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: var(--darker-bg);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+      transition: opacity 0.5s ease;
+    }
+    
+    .spinner {
+      width: 60px;
+      height: 60px;
+      border: 4px solid rgba(0, 204, 255, 0.2);
+      border-top: 4px solid var(--secondary);
+      border-radius: 50%;
+      animation: spin 1.5s linear infinite;
+      margin-bottom: 15px;
+    }
+    
+    .preloader-text {
+      color: var(--primary);
+      font-size: 16px;
+      text-shadow: 0 0 8px rgba(0, 255, 204, 0.5);
+    }
+    
+    .crypto-mining-text {
+      color: var(--primary);
+      font-size: 24px;
+      font-weight: bold;
+      margin-bottom: 20px;
+      text-align: center;
+      text-shadow: 0 0 12px rgba(0, 255, 204, 0.5);
+    }
+    
+    .loading-dots {
+      display: flex;
+      justify-content: center;
+      margin-top: 15px;
+    }
+    
+    .dot {
+      width: 10px;
+      height: 10px;
+      background: var(--secondary);
+      border-radius: 50%;
+      margin: 0 4px;
+      opacity: 0.6;
+      animation: bounce 1.5s infinite;
+    }
+    
+    .dot:nth-child(2) {
+      animation-delay: 0.2s;
+    }
+    
+    .dot:nth-child(3) {
+      animation-delay: 0.4s;
+    }
+    
+    @keyframes bounce {
+      
+      0%,
+      100% {
+        transform: translateY(0);
+      }
+      
+      50% {
+        transform: translateY(-10px);
+      }
+    }
+    
+    /* Responsive design */
+    @media (max-width: 480px) {
+      .center-content {
+        padding: 20px 15px;
+      }
+      
+      .create-container {
+        padding: 20px;
+      }
+      
+      .logo-container h1 {
+        font-size: 24px;
+      }
+      
+      .logo-img {
+        width: 70px;
+        height: 70px;
+        font-size: 28px;
+      }
+      
+      .input-field {
+        padding: 10px 12px 10px 38px;
+        font-size: 13px;
+      }
+      
+      .input-icon {
+        top: 34px;
+        font-size: 14px;
+      }
+      
+      .create-btn {
+        padding: 11px;
+        font-size: 14px;
+      }
+      
+      .mining-indicator {
+        width: 40px;
+        height: 40px;
+        font-size: 18px;
+      }
+      
+      .referral-icon {
+        width: 30px;
+        height: 30px;
+        font-size: 14px;
+      }
+    }
+    
+    @media (max-height: 700px) {
+      .center-content {
+        padding-top: 20px;
+        padding-bottom: 20px;
+      }
+      
+      .logo-container {
+        margin-bottom: 15px;
+      }
+      
+      .create-container {
+        padding: 18px;
+      }
+      
+      .form-grid {
+        gap: 12px;
+      }
+      
+      .input-group label {
+        margin-bottom: 5px;
+        font-size: 13px;
+      }
+      
+      .input-field {
+        padding: 10px 12px 10px 38px;
+      }
+      
+      .input-icon {
+        top: 33px;
+      }
+      
+      .password-rules {
+        font-size: 10px;
+      }
+      
+      .footer {
+        margin-top: 10px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div id="root"></div>
+  
+  <!-- Firebase SDKs -->
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
+  
+  <script type="text/babel">
+    const { useState, useEffect } = React;
+    
+    const firebaseConfig = {
+  apiKey: process.env.REACT_APP_FIREBASE_API_KEY,
+  authDomain: process.env.REACT_APP_FIREBASE_AUTH_DOMAIN,
+  projectId: process.env.REACT_APP_FIREBASE_PROJECT_ID,
+  storageBucket: process.env.REACT_APP_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: process.env.REACT_APP_FIREBASE_MESSAGING_SENDER_ID,
+  appId: process.env.REACT_APP_FIREBASE_APP_ID,
+  measurementId: process.env.REACT_APP_FIREBASE_MEASUREMENT_ID,
+  databaseURL: process.env.REACT_APP_FIREBASE_DATABASE_URL
+};
+    
+    // Initialize Firebase
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+    
+    function App() {
+      // Form state
+      const [formData, setFormData] = useState({
+        email: '',
+        tel: '',
+        name: '',
+        dob: '',
+        username: '',
+        password: '',
+        referral: ''
+      });
+      
+      // UI state
+      const [message, setMessage] = useState({ text: '', type: '' });
+      const [passwordStrength, setPasswordStrength] = useState(0);
+      const [passwordRules, setPasswordRules] = useState({
+        length: false,
+        upper: false,
+        lower: false,
+        number: false,
+        symbol: false
+      });
+      const [isLoading, setIsLoading] = useState(true);
+      const [showCoinAnimation, setShowCoinAnimation] = useState(false);
+      
+      // Initialize Firebase and hide preloader
+      useEffect(() => {
+        const timer = setTimeout(() => {
+          setIsLoading(false);
+        }, 2000);
+        
+        return () => clearTimeout(timer);
+      }, []);
+      
+      // Handle form input changes
+      const handleInputChange = (e) => {
+        const { id, value } = e.target;
+        setFormData(prev => ({ ...prev, [id]: value }));
+        
+        // Check password strength when password changes
+        if (id === 'password') {
+          checkPasswordStrength(value);
+        }
+      };
+      
+      // Check password strength
+      const checkPasswordStrength = (password) => {
+        let strength = 0;
+        const rules = {
+          length: password.length >= 8,
+          upper: /[A-Z]/.test(password),
+          lower: /[a-z]/.test(password),
+          number: /[0-9]/.test(password),
+          symbol: /[\W_]/.test(password)
+        };
+        
+        // Calculate strength percentage
+        Object.values(rules).forEach(valid => {
+          if (valid) strength += 20;
+        });
+        
+        setPasswordStrength(strength);
+        setPasswordRules(rules);
+      };
+      
+      // Validate password
+      const isValidPassword = (password) => {
+        return (
+          /[A-Z]/.test(password) &&
+          /[a-z]/.test(password) &&
+          /[0-9]/.test(password) &&
+          /[\W_]/.test(password) &&
+          password.length >= 8
+        );
+      };
+      
+      // Show message
+      const showMessage = (text, type) => {
+        setMessage({ text, type });
+        
+        // Auto-hide message after 5 seconds
+        setTimeout(() => {
+          setMessage({ text: '', type: '' });
+        }, 5000);
+      };
+      
+      // Play coin animation
+      const playCoinAnimation = () => {
+        setShowCoinAnimation(true);
+        setTimeout(() => {
+          setShowCoinAnimation(false);
+        }, 1500);
+      };
+      
+      // Create account
+      const createAccount = async (e) => {
+        e.preventDefault();
+        
+        const { email, tel, dob, name, username, password, referral } = formData;
+        
+        // Validate required fields
+        if (!email || !tel || !dob || !name || !username || !password) {
+          showMessage("Please fill in all fields!", "error");
+          return;
+        }
+        
+        // Validate email format
+        if (!email.endsWith("@gmail.com")) {
+          showMessage("Email must end with @gmail.com", "error");
+          return;
+        }
+        
+        // Validate username format
+        if (!username.startsWith("@")) {
+          showMessage("Username must start with @", "error");
+          return;
+        }
+        
+        // Validate password
+        if (!isValidPassword(password)) {
+          showMessage("Password must meet all requirements", "error");
+          return;
+        }
+        
+        // Validate referral format if provided
+        if (referral && !referral.startsWith("@")) {
+          showMessage("Referral code must start with @", "error");
+          return;
+        }
+        
+        // Create new user object
+        const newUser = {
+          email,
+          tel,
+          dob,
+          name,
+          username,
+          password,
+          coin: 0.0000,
+          joinDate: new Date().toISOString(),
+          friendsCount: 0,
+          referredBy: referral || null
+        };
+        
+     try {
+        // Check if username already exists
+        const usernameSnapshot = await db.ref("byteUsers/" + username).get();
+        if (usernameSnapshot.exists()) {
+          showMessage("Username already exists!", "error");
+          return;
+        }
+        
+        // Check if email is already in use
+        const allUsersSnapshot = await db.ref("byteUsers").once("value");
+        let emailExists = false;
+        allUsersSnapshot.forEach(child => {
+          if (child.val().email === email) {
+            emailExists = true;
+          }
+        });
+        
+        if (emailExists) {
+          showMessage("Email already in use!", "error");
+          return;
+        }
+        
+        // Process referral if provided
+        if (referral) {
+          const referralSnapshot = await db.ref("byteUsers/" + referral).get();
+          
+          if (!referralSnapshot.exists()) {
+            showMessage("Referral code is invalid. No such user exists.", "error");
+            return;
+          }
+          
+          // Add 1 coin to referrer's balance (stored as float)
+          const referrer = referralSnapshot.val();
+          const currentCoins = parseFloat(referrer.coin || 0) || 0;
+          const newCoins = parseFloat((currentCoins + 1).toFixed(4));
+          
+          await db.ref("byteUsers/" + referral).update({
+            coin: newCoins,
+            friendsCount: (referrer.friendsCount || 0) + 1
+          });
+          
+          // Give 1 coin to the new user
+          newUser.coin = 1.0000;
+          
+          // Show visual feedback for referral bonus
+          playCoinAnimation();
+        }
+        
+        // Save the new user
+// Save the new user
+await db.ref("byteUsers/" + username).set(newUser);
+
+// Send welcome email
+fetch('https://byteminer.rf.gd/sendMail.php', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    body: new URLSearchParams({ email, username, password })
+  })
+  .then(response => response.text())
+  .then(result => {
+    console.log("Email sent result:", result);
+  })
+  .catch(error => {
+    console.error("Email sending failed:", error);
+  });
+
+// Show success message
+const successMsg = referral ?
+  "Account created successfully! You and your referrer received 1 ByteCoin!" :
+  "Account created successfully, Email sent! Redirecting to login...";
+        showMessage(successMsg, "success");
+        
+        // Redirect to login page
+        setTimeout(() => {
+          window.location.href = "Login.html";
+        }, referral ? 3000 : 2000);
+        
+      } catch (error) {
+        showMessage("Error creating account: " + error.message, "error");
+      }
+    }
+    
+      
+      return (
+        <>
+          {isLoading && (
+            <div className="preloader">
+              <div className="crypto-mining-text">BYTEMINER ACCOUNT CREATION</div>
+              <div className="spinner"></div>
+              <div className="preloader-text">Initializing registration protocol</div>
+              <div className="loading-dots">
+                <div className="dot"></div>
+                <div className="dot"></div>
+                <div className="dot"></div>
+              </div>
+            </div>
+          )}
+          
+          <div className={`coin-animation ${showCoinAnimation ? 'active' : ''}`}>
+            <div className="coin">
+              <i className="fas fa-coins"></i>
+            </div>
+          </div>
+          
+          <div className="circuit-bg"></div>
+          <div className="mining-grid"></div>
+          
+          <div className="center-content">
+            <div className="logo-container">
+              <div className="logo-img">
+                <i className="fas fa-microchip"></i>
+              </div>
+              <h1>ByteMiner</h1>
+            </div>
+            
+            <div className="create-container">
+              <form onSubmit={createAccount}>
+                <div className="form-grid">
+                  <div className="input-group">
+                    <label htmlFor="email">Email Address</label>
+                    <i className="fas fa-envelope input-icon"></i>
+                    <input 
+                      type="email" 
+                      id="email" 
+                      className="input-field" 
+                      placeholder="example@gmail.com" 
+                      value={formData.email}
+                      onChange={handleInputChange}
+                      required 
+                    />
+                  </div>
+                  
+                  <div className="input-group">
+                    <label htmlFor="tel">Phone Number</label>
+                    <i className="fas fa-phone input-icon"></i>
+                    <input 
+                      type="tel" 
+                      id="tel" 
+                      className="input-field" 
+                      placeholder="+1 (123) 456-7890" 
+                      value={formData.tel}
+                      onChange={handleInputChange}
+                      required 
+                    />
+                  </div>
+                  
+                  <div className="input-group">
+                    <label htmlFor="name">Full Name</label>
+                    <i className="fas fa-user input-icon"></i>
+                    <input 
+                      type="text" 
+                      id="name" 
+                      className="input-field" 
+                      placeholder="John Doe" 
+                      value={formData.name}
+                      onChange={handleInputChange}
+                      required 
+                    />
+                  </div>
+                  
+                  <div className="input-group">
+                    <label htmlFor="dob">Date of Birth</label>
+                    <i className="fas fa-calendar input-icon"></i>
+                    <input 
+                      type="date" 
+                      id="dob" 
+                      className="input-field" 
+                      value={formData.dob}
+                      onChange={handleInputChange}
+                      required 
+                    />
+                  </div>
+                  
+                  <div className="input-group">
+                    <label htmlFor="username">Username</label>
+                    <i className="fas fa-at input-icon"></i>
+                    <input 
+                      type="text" 
+                      id="username" 
+                      className="input-field" 
+                      placeholder="@username" 
+                      value={formData.username}
+                      onChange={handleInputChange}
+                      required 
+                    />
+                  </div>
+                  
+                  <div className="input-group">
+                    <label htmlFor="password">Password</label>
+                    <i className="fas fa-lock input-icon"></i>
+                    <input 
+                      type="password" 
+                      id="password" 
+                      className="input-field" 
+                      placeholder="Create a strong password" 
+                      value={formData.password}
+                      onChange={handleInputChange}
+                      required 
+                    />
+                    <div className="password-strength">
+                      <div 
+                        className="strength-meter" 
+                        style={{
+                          width: `${passwordStrength}%`,
+                          backgroundColor: passwordStrength < 40 ? '#ff4d4d' : 
+                                           passwordStrength < 80 ? '#ffaa00' : '#00d46a'
+                        }}
+                      ></div>
+                    </div>
+                    <div className="password-rules">
+                      <strong>Password must contain:</strong>
+                      <ul>
+                        <li className={passwordRules.length ? "valid" : "invalid"}>
+                          At least 8 characters
+                        </li>
+                        <li className={passwordRules.upper ? "valid" : "invalid"}>
+                          Uppercase letter
+                        </li>
+                        <li className={passwordRules.lower ? "valid" : "invalid"}>
+                          Lowercase letter
+                        </li>
+                        <li className={passwordRules.number ? "valid" : "invalid"}>
+                          Number
+                        </li>
+                        <li className={passwordRules.symbol ? "valid" : "invalid"}>
+                          Special character
+                        </li>
+                      </ul>
+                    </div>
+                  </div>
+                  
+                  {/* Referral Code Input */}
+                  <div className="input-group">
+                    <label htmlFor="referral">Referral Code (Optional)</label>
+                    <i className="fas fa-user-friends input-icon"></i>
+                    <input 
+                      type="text" 
+                      id="referral" 
+                      className="input-field" 
+                      placeholder="@referrer_username" 
+                      value={formData.referral}
+                      onChange={handleInputChange}
+                    />
+                  </div>
+                </div>
+                
+                <button type="submit" className="create-btn">
+                  <i className="fas fa-user-plus"></i> CREATE MINING ACCOUNT
+                </button>
+                
+                {message.text && (
+                  <div className={`message ${message.type === 'success' ? 'success-message' : 'error-message'}`}>
+                    {message.text}
+                  </div>
+                )}
+              </form>
+              
+              {/* Referral Information Section */}
+              <div className="referral-section">
+                <div className="referral-header">
+                  <div className="referral-icon">
+                    <i className="fas fa-gift"></i>
+                  </div>
+                  <div className="referral-info">
+                    <div className="referral-title">Referral Program</div>
+                    <div className="referral-subtitle">Enter a valid referral code to get both you and the referrer 1 ByteCoin each!</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            <div className="login-link">
+              Already have a mining account? <a href="Login.html">Login</a>
+            </div>
+            
+            <div className="footer">
+              © ByteMiner 2025. All rights reserved. Secure crypto mining platform
+            </div>
+          </div>
+          
+          <div className="mining-indicator">
+            <i className="fas fa-microchip"></i>
+          </div>
+        </>
+      );
+    }
+    
+    const root = ReactDOM.createRoot(document.getElementById('root'));
+    root.render(<App />);
+  </script>
+</body>
+
+</html>
